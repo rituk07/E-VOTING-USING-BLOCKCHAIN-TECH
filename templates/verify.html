@@ -1,0 +1,84 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="card reveal" style="max-width: 600px; margin: 2rem auto; text-align: center;">
+    <h1>Live Verification</h1>
+    <p style="color: var(--text-muted); margin-bottom: 2rem;">Please center your face in the frame. Our AI is checking for fraud and multi-face patterns.</p>
+
+    <div class="camera-container" style="border-color: var(--primary);">
+        <video id="video" autoplay playsinline></video>
+        <div class="camera-overlay" style="border-color: var(--primary); border-width: 3px;"></div>
+        
+        <div id="status-indicator" style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); padding: 0.5rem 1.5rem; border-radius: 20px; background: rgba(0,0,0,0.6); font-size: 0.8rem; font-weight: 700; white-space: nowrap;">
+            Scanning...
+        </div>
+    </div>
+
+    <div id="result-msg" style="margin-top: 1rem; font-weight: 600; min-height: 1.5rem;"></div>
+    
+    <div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: center;">
+        <button id="verifyBtn" class="btn-primary" style="padding: 1rem 3rem;">Verify Now</button>
+        <a href="/dashboard" class="btn-secondary" style="text-decoration: none; padding: 1rem 2rem; border: 1px solid var(--glass-border); border-radius: 12px; color: var(--text-muted);">Cancel</a>
+    </div>
+</div>
+
+{% block scripts %}
+<script>
+    const video = document.getElementById('video');
+    const verifyBtn = document.getElementById('verifyBtn');
+    const statusIdx = document.getElementById('status-indicator');
+    const resultMsg = document.getElementById('result-msg');
+
+    navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => { video.srcObject = stream; })
+        .catch(err => { 
+            statusIdx.innerText = "Camera Error";
+            statusIdx.style.color = "var(--error)";
+        });
+
+    verifyBtn.addEventListener('click', async () => {
+        verifyBtn.disabled = true;
+        verifyBtn.innerText = "Analyzing...";
+        statusIdx.innerText = "Capturing...";
+        
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0);
+        const imageData = canvas.toDataURL('image/jpeg', 0.8);
+
+        try {
+            const response = await fetch('/api/verify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ image: imageData })
+            });
+            const result = await response.json();
+
+            if (result.status === 'success') {
+                resultMsg.style.color = "var(--success)";
+                resultMsg.innerText = "✓ IDENTITY CONFIRMED";
+                statusIdx.innerText = "Redirecting...";
+                setTimeout(() => { window.location.href = '/vote'; }, 1500);
+            } else {
+                resultMsg.style.color = "var(--error)";
+                resultMsg.innerText = result.message || "Verification Failed";
+                verifyBtn.disabled = false;
+                verifyBtn.innerText = "Try Again";
+                statusIdx.innerText = "Scan Failed";
+            }
+        } catch (error) {
+            resultMsg.innerText = "Connection Error";
+            verifyBtn.disabled = false;
+        }
+    });
+
+    // Auto-scan pulse effect
+    setInterval(() => {
+        if (!verifyBtn.disabled) {
+            statusIdx.style.opacity = statusIdx.style.opacity == "0.5" ? "1" : "0.5";
+        }
+    }, 800);
+</script>
+{% endblock %}
+{% endblock %}

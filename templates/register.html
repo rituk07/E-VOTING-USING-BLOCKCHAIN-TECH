@@ -1,0 +1,60 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="card reveal" style="max-width: 600px; margin: 2rem auto;">
+    <h2 style="text-align: center;">Account Registration</h2>
+    <p style="text-align: center; color: var(--text-muted); margin-bottom: 2rem;">Create your secure voting ID with face verification.</p>
+
+    <form method="POST" id="registerForm">
+        <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" name="name" placeholder="Enter your full name" required>
+        </div>
+        <div class="form-group">
+            <label>Government Voter ID</label>
+            <input type="text" name="voter_id" placeholder="ID Number" required>
+        </div>
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" name="password" placeholder="Secure Password" required>
+        </div>
+
+        <div class="face-capture-section" style="text-align: center; margin-top: 2rem;">
+            <p style="font-weight: 600; margin-bottom: 1rem;">📸 Face Registration (Required)</p>
+            <div class="camera-container">
+                <video id="video" autoplay playsinline></video>
+                <div class="camera-overlay"></div>
+            </div>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 1rem;">Ensure you are in a well-lit area and looking directly at the camera.</p>
+        </div>
+
+        <input type="hidden" name="image_data" id="image_data">
+        <button type="submit" class="btn-primary" style="width: 100%; margin-top: 2rem;" id="submitBtn">Register Account</button>
+    </form>
+</div>
+
+{% block scripts %}
+<script>
+    const video = document.getElementById('video');
+    const form = document.getElementById('registerForm');
+    const imageInput = document.getElementById('image_data');
+
+    navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => { video.srcObject = stream; })
+        .catch(err => { alert("Camera access denied! Face registration is mandatory."); });
+
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0);
+        
+        imageInput.value = canvas.toDataURL('image/jpeg', 0.8);
+        document.getElementById('submitBtn').innerText = "Processing Security Checks...";
+        document.getElementById('submitBtn').disabled = true;
+        form.submit();
+    });
+</script>
+{% endblock %}
+{% endblock %}

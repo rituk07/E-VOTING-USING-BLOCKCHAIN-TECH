@@ -1,0 +1,97 @@
+{% extends "layout.html" %}
+
+{% block title %}Election Results - VoterChain{% endblock %}
+
+{% block content %}
+<div class="results-container">
+    <div class="results-header">
+        <h2>Live Election Analytics</h2>
+        <p>Immutable blockchain-verified data • Total Votes: <strong>{{ total }}</strong></p>
+    </div>
+
+    <!-- 📊 CHARTS SECTION -->
+    <div class="charts-grid mt-4">
+        <div class="chart-card">
+            <h3>Party Vote Share</h3>
+            <canvas id="partyChart"></canvas>
+        </div>
+        <div class="chart-card">
+            <h3>Candidate Performance</h3>
+            <canvas id="candidateChart"></canvas>
+        </div>
+    </div>
+
+    <!-- 📋 DETAILED TALLY -->
+    <div class="tally-section mt-8">
+        <h3>Party-Level Tally</h3>
+        <div class="party-tally-list">
+            {% for name, count in party_results.items() %}
+            <div class="tally-item">
+                <div class="tally-info">
+                    <strong>{{ name }}</strong>
+                    <span>{{ count }} Votes</span>
+                </div>
+                <div class="tally-progress">
+                    {% set pct = (count / total * 100) if total > 0 else 0 %}
+                    <div class="progress-bar-fill" style="width: {{ pct }}%"></div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="mt-8 text-center">
+        <a href="/dashboard" class="btn-secondary">Back to Dashboard</a>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const partyData = {
+        labels: {{ party_results.keys() | list | tojson }},
+        datasets: [{
+            data: {{ party_results.values() | list | tojson }},
+            backgroundColor: ['#6366f1', '#ec4899', '#22c55e', '#eab308', '#ef4444'],
+            borderWidth: 0
+        }]
+    };
+
+    const candidateData = {
+        labels: {{ candidate_results.keys() | list | tojson }},
+        datasets: [{
+            label: 'Votes',
+            data: {{ candidate_results.values() | list | tojson }},
+            backgroundColor: 'rgba(99, 102, 241, 0.5)',
+            borderColor: '#6366f1',
+            borderWidth: 2
+        }]
+    };
+
+    new Chart(document.getElementById('partyChart'), {
+        type: 'pie',
+        data: partyData,
+        options: { plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8' } } } }
+    });
+
+    new Chart(document.getElementById('candidateChart'), {
+        type: 'bar',
+        data: candidateData,
+        options: { 
+            scales: { y: { beginAtZero: true, grid: { color: '#334155' } } },
+            plugins: { legend: { display: false } }
+        }
+    });
+</script>
+
+<style>
+    .charts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; }
+    .chart-card { background: var(--glass); padding: 2rem; border-radius: 24px; border: 1px solid var(--glass-border); }
+    .chart-card h3 { font-size: 1.125rem; margin-bottom: 1.5rem; color: var(--text-main); }
+    
+    .tally-section { background: var(--glass); padding: 2.5rem; border-radius: 24px; border: 1px solid var(--glass-border); }
+    .tally-item { margin-bottom: 1.5rem; }
+    .tally-info { display: flex; justify-content: space-between; margin-bottom: 0.5rem; }
+    .tally-progress { height: 8px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; }
+    .progress-bar-fill { height: 100%; background: var(--primary); border-radius: 4px; }
+</style>
+{% endblock %}

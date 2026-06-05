@@ -1,0 +1,75 @@
+{% extends "layout.html" %}
+
+{% block title %}Manage Candidates - Admin{% endblock %}
+
+{% block content %}
+<div class="section-header">
+    <h2>Candidate Registry</h2>
+    <a href="/admin" class="btn-secondary">Back to Admin</a>
+</div>
+
+<div class="admin-content mt-4">
+    <div class="form-box">
+        <h3>Add New Candidate</h3>
+        <form method="POST">
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" name="name" placeholder="Candidate Name" required>
+            </div>
+            <div class="form-group">
+                <label>Position</label>
+                <input type="text" name="position" placeholder="e.g. President" required>
+            </div>
+            <div class="form-group">
+                <label>Political Party</label>
+                <select name="party_id" required style="width: 100%; padding: 0.75rem; border-radius: 12px; background: rgba(15,23,42,0.8); color: white; border: 1px solid var(--glass-border);">
+                    {% for party in parties %}
+                    <option value="{{ party.id }}">{{ party.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Photo URL</label>
+                <input type="text" name="photo_url" placeholder="https://example.com/photo.jpg">
+            </div>
+            <div class="form-group">
+                <label>Short Bio</label>
+                <input type="text" name="bio" placeholder="Campaign slogan or mission">
+            </div>
+            <button type="submit" class="btn-primary">Register Candidate</button>
+        </form>
+    </div>
+
+    <div class="list-box mt-8">
+        <h3>Candidates List</h3>
+        <div class="candidate-table-wrapper">
+            <table class="candidate-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Party</th>
+                        <th>Position</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in candidates %}
+                    <tr>
+                        <td>{{ c.name }}</td>
+                        <td><span class="badge">{{ c.party_name }}</span></td>
+                        <td>{{ c.position }}</td>
+                        <td><span class="status-dot"></span> Active</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+    .candidate-table { width: 100%; border-collapse: collapse; margin-top: 1rem; text-align: left; }
+    .candidate-table th, .candidate-table td { padding: 1rem; border-bottom: 1px solid var(--glass-border); }
+    .status-dot { height: 10px; width: 10px; background-color: var(--success); border-radius: 50%; display: inline-block; margin-right: 5px; }
+</style>
+{% endblock %}

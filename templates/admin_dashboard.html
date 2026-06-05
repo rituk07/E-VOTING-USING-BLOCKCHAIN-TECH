@@ -1,0 +1,57 @@
+{% extends "layout.html" %}
+
+{% block title %}Admin Dashboard - VoterChain{% endblock %}
+
+{% block content %}
+<div class="admin-header">
+    <h2>Election Control Center</h2>
+    <p>Manage parties, candidates, and monitor live election status.</p>
+</div>
+
+<div class="admin-grid mt-4">
+    <a href="/admin/parties" class="admin-card">
+        <div class="icon">🏛️</div>
+        <h3>Manage Parties</h3>
+        <p>Register political parties and set their official colors.</p>
+    </a>
+    
+    <a href="/admin/candidates" class="admin-card">
+        <div class="icon">👤</div>
+        <h3>Manage Candidates</h3>
+        <p>Assign candidates to parties and define their positions.</p>
+    </a>
+
+    <a href="/results" class="admin-card">
+        <div class="icon">📊</div>
+        <h3>Live Monitoring</h3>
+        <p>View real-time vote aggregation and performance metrics.</p>
+    </a>
+</div>
+
+<style>
+    .admin-header { text-align: left; margin-bottom: 2rem; border-bottom: 1px solid var(--glass-border); padding-bottom: 1rem; }
+    .admin-header p { text-align: left; }
+    
+    .admin-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; }
+    
+    .admin-card { 
+        background: var(--glass); 
+        border: 1px solid var(--glass-border); 
+        padding: 2rem; 
+        border-radius: 20px; 
+        text-align: center; 
+        text-decoration: none;
+        transition: 0.3s;
+    }
+    
+    .admin-card:hover { 
+        background: rgba(255,255,255,0.1); 
+        transform: translateY(-5px); 
+        border-color: var(--primary);
+    }
+    
+    .admin-card .icon { font-size: 3rem; margin-bottom: 1rem; }
+    .admin-card h3 { color: var(--text-main); margin-bottom: 0.5rem; }
+    .admin-card p { font-size: 0.875rem; color: var(--text-muted); }
+</style>
+{% endblock %}
